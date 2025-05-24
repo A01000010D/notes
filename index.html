@@ -4,38 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monolith Note</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@40400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* CSS Variables for easy theming */
         :root {
-            --bg-color: #000;
-            --text-color: #FFF;
-            --line-number-color: #555; /* Slightly darker gray for line numbers */
-            --border-color: #333; /* For subtle separators */
+            --bg-color: #1a1a1a; /* Darker background */
+            --text-color: #e0e0e0; /* Lighter text for contrast */
+            --line-number-color: #666; /* Slightly darker gray for line numbers */
+            --border-color: #444; /* For subtle separators */
+            --caret-color: #00ff00; /* Green blinking cursor for "terminal" feel */
         }
 
         body {
             background-color: var(--bg-color);
             margin: 0;
-            overflow: hidden;
+            overflow: hidden; /* Hide main body scrollbar */
             height: 100vh;
             display: flex;
-            font-family: 'Roboto Mono', monospace; /* More common monospace, with fallback */
-            font-size: 1.1em; /* Slightly adjusted size */
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.1em;
             line-height: 1.6; /* Improved line spacing for readability */
-            color: var(--text-color); /* Set default text color */
+            color: var(--text-color);
         }
 
         .container {
             display: flex;
             width: 100%;
             height: 100%;
-            border-left: 1px solid var(--border-color); /* Add a left border for a "terminal" feel */
+            /* No left border on container, instead use right border on line numbers */
         }
 
-        /* Custom Scrollbar Styles (for Webkit browsers like Chrome/Safari) */
+        /* Custom Scrollbar Styles for Webkit browsers */
         ::-webkit-scrollbar {
             width: 8px;
-            height: 8px;
+            height: 8px; /* For horizontal scroll if text overflows */
         }
         ::-webkit-scrollbar-track {
             background: var(--bg-color);
@@ -50,13 +52,13 @@
 
         /* Line numbers area */
         #lineNumbers {
-            flex-shrink: 0;
-            padding: 20px 10px 20px 15px; /* Adjusted padding for better visual balance */
+            flex-shrink: 0; /* Prevent shrinking */
+            padding: 20px 10px 20px 15px; /* Adjusted padding */
             background-color: var(--bg-color);
             color: var(--line-number-color);
             text-align: right;
-            user-select: none;
-            overflow: hidden;
+            user-select: none; /* Prevent text selection */
+            overflow: hidden; /* Hide scrollbar for line numbers */
             border-right: 1px solid var(--border-color); /* Subtle separator */
             font-size: 0.9em; /* Slightly smaller font for numbers */
             line-height: inherit; /* Inherit line height for consistent spacing */
@@ -68,22 +70,22 @@
 
         /* Main typing area */
         #notePad {
-            flex-grow: 1;
+            flex-grow: 1; /* Take up remaining space */
             padding: 20px;
             background-color: var(--bg-color);
             color: var(--text-color);
             border: none;
-            resize: none;
-            box-sizing: border-box;
-            outline: none;
-            font-family: inherit;
+            resize: none; /* Disable manual resize handle */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+            outline: none; /* Remove focus outline */
+            font-family: inherit; /* Inherit font from body */
             font-size: inherit;
             line-height: inherit;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            text-shadow: 0 0 1px rgba(255, 255, 255, 0.1); /* Subtle text shadow */
-            caret-color: var(--text-color); /* Blinking cursor color */
+            overflow-y: auto; /* Enable vertical scrollbar when content overflows */
+            white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+            word-wrap: break-word; /* Break long words */
+            text-shadow: 0 0 1px rgba(255, 255, 255, 0.1); /* Subtle text shadow for "glow" */
+            caret-color: var(--caret-color); /* Blinking cursor color */
         }
 
         /* Placeholder style for better user guidance */
@@ -103,57 +105,69 @@
         const notePad = document.getElementById('notePad');
         const lineNumbers = document.getElementById('lineNumbers');
 
+        // Function to update line numbers based on content
         function updateLineNumbers() {
-            // Ensure at least one line number is always displayed
+            // Get the current text and split by newlines
             const text = notePad.value;
             const lines = text.split('\n');
-            const numberOfLines = Math.max(lines.length, 1); // At least 1 line
+            // Determine the number of lines, ensuring at least one line is always shown
+            const numberOfLines = Math.max(lines.length, 1);
+            
+            // Generate HTML for line numbers
             const numbersHtml = Array.from({ length: numberOfLines }, (_, i) => `<div>${i + 1}</div>`).join('');
             lineNumbers.innerHTML = numbersHtml;
 
-            // Sync scroll immediately after updating numbers, in case content reflows
+            // Immediately sync scroll positions after updating numbers
             syncScroll();
         }
 
+        // Function to synchronize the scroll position of line numbers with the notepad
         function syncScroll() {
             lineNumbers.scrollTop = notePad.scrollTop;
         }
 
-        // Handles Tab key to insert a tab character instead of changing focus
+        // Event listener for the Tab key
         notePad.addEventListener('keydown', (e) => {
             if (e.key === 'Tab') {
                 e.preventDefault(); // Prevent default tab behavior (focusing next element)
+                
                 const start = notePad.selectionStart;
                 const end = notePad.selectionEnd;
 
-                // Insert tab character
+                // Insert a tab character at the current cursor position
                 notePad.value = notePad.value.substring(0, start) + '\t' + notePad.value.substring(end);
 
-                // Move cursor to after the inserted tab
+                // Move the cursor to after the inserted tab
                 notePad.selectionStart = notePad.selectionEnd = start + 1;
 
                 updateLineNumbers(); // Update line numbers after inserting tab
             }
         });
 
+        // Event listener for when the DOM is fully loaded
         document.addEventListener('DOMContentLoaded', () => {
-            const savedNote = localStorage.getItem('monolithNote'); // Changed key to avoid conflicts
+            // Try to load a saved note from localStorage
+            const savedNote = localStorage.getItem('monolithNote');
             if (savedNote) {
                 notePad.value = savedNote;
             } else {
-                // Pre-fill with a helpful tip if empty
+                // If no saved note, pre-fill with a helpful message
                 notePad.value = "Welcome to Monolith Note!\n\nStart typing your thoughts here. Your work saves automatically.\n\nPress Tab for indentation.";
             }
-            updateLineNumbers(); // Initial update
+            updateLineNumbers(); // Initial update of line numbers
         });
 
+        // Event listener for any input in the notepad (typing, pasting, etc.)
         notePad.addEventListener('input', () => {
-            updateLineNumbers();
-            localStorage.setItem('monolithNote', notePad.value); // Changed key
+            updateLineNumbers(); // Update line numbers
+            localStorage.setItem('monolithNote', notePad.value); // Save content to localStorage
         });
 
+        // Event listener for scrolling in the notepad
         notePad.addEventListener('scroll', syncScroll);
-        window.addEventListener('resize', updateLineNumbers); // Recalculate on resize
+
+        // Event listener for window resizing (to adjust line numbers if layout changes)
+        window.addEventListener('resize', updateLineNumbers);
     </script>
 </body>
 </html>
