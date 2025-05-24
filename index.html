@@ -3,63 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Note </title>
+    <title>Note</title>
     <link href="https://fonts.cdnfonts.com/css/thegoodmonolith" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #000;
+            --text-color: #FFF;
+            --font-family-monospace: 'TheGoodMonolith', monospace;
+            --font-size-base: 1.2em;
+            --line-height-base: 1.5;
+            --padding-base: 20px;
+        }
+
         body {
-            background-color: #000; /* Black background */
+            background-color: var(--bg-color);
             margin: 0;
-            /* No overflow: hidden; here to allow main body scroll if needed */
             height: 100vh;
-            display: flex; /* Use flexbox for layout */
-            font-family: TheGoodMonolith; /* Default monospace font */
-            font-size: 1.2em; /* Good size for reading */
-            line-height: 1.5; /* Good line spacing */
+            display: flex;
+            font-family: var(--font-family-monospace);
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-base);
         }
 
         .container {
-            display: flex; /* Use flexbox for the numbers and text area */
+            display: flex;
             width: 100%;
             height: 100%;
         }
 
-        /* Styling for the main typing area */
         #notePad {
-            flex-grow: 1; /* Allow the textarea to take up remaining space */
-            padding: 20px;
-            background-color: #000; /* Black background for typing */
-            color: #FFF; /* White text */
+            flex-grow: 1;
+            padding: var(--padding-base);
+            background-color: var(--bg-color);
+            color: var(--text-color);
             border: none;
             resize: none;
             box-sizing: border-box;
             outline: none;
-            /* Match font-family, font-size, and line-height with body for consistent spacing */
             font-family: inherit;
             font-size: inherit;
             line-height: inherit;
-            overflow-y: auto; /* Allow vertical scrolling */
-            white-space: pre-wrap; /* Preserve line breaks and wrap text */
-            word-wrap: break-word; /* Break long words */
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <textarea id="notePad"></textarea>
+        <textarea id="notePad" placeholder="Start typing your note here..."></textarea>
     </div>
 
     <script>
-        const notePad = document.getElementById('notePad');
-
         document.addEventListener('DOMContentLoaded', () => {
+            const notePad = document.getElementById('notePad');
+
             const savedNote = localStorage.getItem('numberedNote');
             if (savedNote) {
                 notePad.value = savedNote;
             }
-        });
 
-        notePad.addEventListener('input', () => {
-            localStorage.setItem('numberedNote', notePad.value);
+            notePad.addEventListener('input', () => {
+                localStorage.setItem('numberedNote', notePad.value);
+            });
         });
     </script>
 </body>
