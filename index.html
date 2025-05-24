@@ -3,67 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Note</title>
+    <title> Note </title>
     <link href="https://fonts.cdnfonts.com/css/thegoodmonolith" rel="stylesheet">
     <style>
-        /* Define CSS Variables at the root */
-        :root {
-            --background-color: #000;
-            --text-color: #FFF;
-            --font-family: 'TheGoodMonolith', monospace;
-            --font-size: 1.2em;
-            --line-height: 1.5;
-            --padding-value: 20px;
-        }
-
-        html, body {
+        body {
+            background-color: #000; /* Black background */
             margin: 0;
-            padding: 0;
-            height: 100vh; /* Make sure html and body take full viewport height */
-            overflow: hidden; /* Prevent scrollbars on html/body */
-            background-color: var(--background-color);
-            color: var(--text-color);
-            font-family: var(--font-family);
-            font-size: var(--font-size);
-            line-height: var(--line-height);
-            display: flex; /* Use flexbox on body to make textarea fill space */
+            /* No overflow: hidden; here to allow main body scroll if needed */
+            height: 100vh;
+            display: flex; /* Use flexbox for layout */
+            font-family: TheGoodMonolith; /* Default monospace font */
+            font-size: 1.2em; /* Good size for reading */
+            line-height: 1.5; /* Good line spacing */
         }
 
+        .container {
+            display: flex; /* Use flexbox for the numbers and text area */
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Styling for the main typing area */
         #notePad {
             flex-grow: 1; /* Allow the textarea to take up remaining space */
-            padding: var(--padding-value);
-            background-color: var(--background-color);
-            color: var(--text-color);
+            padding: 20px;
+            background-color: #000; /* Black background for typing */
+            color: #FFF; /* White text */
             border: none;
-            resize: none; /* Disable manual resizing */
-            box-sizing: border-box; /* Include padding in the element's total width and height */
-            outline: none; /* Remove focus outline */
-            font-family: inherit; /* Inherit font from body */
-            font-size: inherit; /* Inherit font size from body */
-            line-height: inherit; /* Inherit line height from body */
-            overflow-y: auto; /* Allow vertical scrolling within the textarea */
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+            /* Match font-family, font-size, and line-height with body for consistent spacing */
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            overflow-y: auto; /* Allow vertical scrolling */
             white-space: pre-wrap; /* Preserve line breaks and wrap text */
-            word-wrap: break-word; /* Break long words to prevent overflow */
+            word-wrap: break-word; /* Break long words */
         }
     </style>
 </head>
 <body>
-    <textarea id="notePad"></textarea>
+    <div class="container">
+        <textarea id="notePad"></textarea>
+    </div>
 
     <script>
         const notePad = document.getElementById('notePad');
 
-        // Load saved note when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            const savedNote = localStorage.getItem('simpleNote');
+            const savedNote = localStorage.getItem('numberedNote');
             if (savedNote) {
                 notePad.value = savedNote;
             }
         });
 
-        // Save note to local storage whenever the user types
         notePad.addEventListener('input', () => {
-            localStorage.setItem('simpleNote', notePad.value);
+            localStorage.setItem('numberedNote', notePad.value);
         });
     </script>
 </body>
