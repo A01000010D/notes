@@ -8,11 +8,10 @@
     <style>
         /* CSS Variables for easy theming */
         :root {
-            --bg-color: #1a1a1a; /* Darker background */
-            --text-color: #e0e0e0; /* Lighter text for contrast */
-            --line-number-color: #666; /* This variable isn't used directly for line numbers anymore, but kept for consistency if you add other subtle elements */
-            --border-color: #444; /* For subtle separators if needed */
-            --caret-color: #00ff00; /* Green blinking cursor for "terminal" feel */
+            --bg-color: #000000; /* Pure black background */
+            --text-color: #ffffff; /* Pure white text */
+            --glow-color: #ffffff; /* White for the glow */
+            --caret-color: #ffffff; /* White blinking cursor */
         }
 
         body {
@@ -25,13 +24,13 @@
             font-size: 1.1em;
             line-height: 1.6; /* Improved line spacing for readability */
             color: var(--text-color);
+            /* filter: blur(0.2px); /* Experiment with this for a subtle overall diffusion */
         }
 
         .container {
             display: flex;
             width: 100%;
             height: 100%;
-            /* No left border on container, as line numbers are removed */
         }
 
         /* Custom Scrollbar Styles for Webkit browsers */
@@ -43,11 +42,11 @@
             background: var(--bg-color);
         }
         ::-webkit-scrollbar-thumb {
-            background: var(--line-number-color); /* Using a darker shade for the thumb */
+            background: #333333; /* Darker gray for the thumb */
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #777;
+            background: #555555;
         }
 
         /* Main typing area */
@@ -66,13 +65,23 @@
             overflow-y: auto; /* Enable vertical scrollbar when content overflows */
             white-space: pre-wrap; /* Preserve whitespace and wrap lines */
             word-wrap: break-word; /* Break long words */
-            text-shadow: 0 0 1px rgba(255, 255, 255, 0.1); /* Subtle text shadow for "glow" */
+            
+            /* --- NEON EFFECT HERE --- */
+            text-shadow:
+                0 0 5px var(--glow-color),   /* Initial glow */
+                0 0 10px var(--glow-color),  /* Medium glow */
+                0 0 20px var(--glow-color),  /* Stronger glow */
+                0 0 30px rgba(255, 255, 255, 0.6), /* Wider, fading glow */
+                0 0 45px rgba(255, 255, 255, 0.4),
+                0 0 60px rgba(255, 255, 255, 0.2);
+            /* --- END NEON EFFECT --- */
+
             caret-color: var(--caret-color); /* Blinking cursor color */
         }
 
         /* Placeholder style for better user guidance */
         #notePad::placeholder {
-            color: var(--line-number-color);
+            color: #888888; /* Slightly lighter gray for placeholder */
             opacity: 0.7;
         }
     </style>
@@ -84,7 +93,6 @@
 
     <script>
         const notePad = document.getElementById('notePad');
-        // lineNumbers constant and related functions (updateLineNumbers, syncScroll) are removed
 
         // Event listener for the Tab key
         notePad.addEventListener('keydown', (e) => {
@@ -112,17 +120,12 @@
                 // If no saved note, pre-fill with a helpful message
                 notePad.value = "Welcome to Monolith Note!\n\nStart typing your thoughts here. Your work saves automatically.\n\nPress Tab for indentation.";
             }
-            // No initial updateLineNumbers call needed anymore
         });
 
         // Event listener for any input in the notepad (typing, pasting, etc.)
         notePad.addEventListener('input', () => {
-            // No updateLineNumbers call needed here
             localStorage.setItem('monolithNote', notePad.value); // Save content to localStorage
         });
-
-        // Scroll synchronization is no longer needed as there's no separate line number element
-        // window.addEventListener('resize', updateLineNumbers); // This is also removed
     </script>
 </body>
 </html>
