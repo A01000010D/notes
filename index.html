@@ -3,63 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Note </title>
-    <link href="https://fonts.cdnfonts.com/css/thegoodmonolith" rel="stylesheet">
+    <title>Monolith Note</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@40400&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #000;
+            --text-color: #FFF;
+            --line-number-color: #555; /* Slightly darker gray for line numbers */
+            --border-color: #333; /* For subtle separators */
+        }
+
         body {
-            background-color: #000; /* Black background */
+            background-color: var(--bg-color);
             margin: 0;
-            overflow: hidden; /* Hide main body scrollbars */
+            overflow: hidden;
             height: 100vh;
-            display: flex; /* Use flexbox for layout */
-            font-family: TheGoodMonolith; /* Default monospace font */
-            font-size: 1.2em; /* Good size for reading */
-            line-height: 1.5; /* Good line spacing */
+            display: flex;
+            font-family: 'Roboto Mono', monospace; /* More common monospace, with fallback */
+            font-size: 1.1em; /* Slightly adjusted size */
+            line-height: 1.6; /* Improved line spacing for readability */
+            color: var(--text-color); /* Set default text color */
         }
 
         .container {
-            display: flex; /* Use flexbox for the numbers and text area */
+            display: flex;
             width: 100%;
             height: 100%;
+            border-left: 1px solid var(--border-color); /* Add a left border for a "terminal" feel */
         }
 
-        /* Styling for the line numbers area */
+        /* Custom Scrollbar Styles (for Webkit browsers like Chrome/Safari) */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--line-number-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        /* Line numbers area */
         #lineNumbers {
-            flex-shrink: 0; /* Don't shrink the numbers area */
-            /* Adjusted padding: top, right, bottom, left */
-            padding: 20px 5px 20px 10px; /* Reduced right padding to 5px and left to 10px */
-            background-color: #000; /* Black background for numbers */
-            color: #888; /* Gray color for line numbers */
-            text-align: right; /* Align numbers to the right */
-            user-select: none; /* Prevent selecting numbers */
-            overflow: hidden; /* Hide scrollbar for numbers */
-            border-right: 1px solid #000; /* Small separator line */
+            flex-shrink: 0;
+            padding: 20px 10px 20px 15px; /* Adjusted padding for better visual balance */
+            background-color: var(--bg-color);
+            color: var(--line-number-color);
+            text-align: right;
+            user-select: none;
+            overflow: hidden;
+            border-right: 1px solid var(--border-color); /* Subtle separator */
+            font-size: 0.9em; /* Slightly smaller font for numbers */
+            line-height: inherit; /* Inherit line height for consistent spacing */
         }
 
-        /* Styling for the main typing area */
+        #lineNumbers div {
+            height: 1.6em; /* Match line-height of notePad for perfect sync */
+        }
+
+        /* Main typing area */
         #notePad {
-            flex-grow: 1; /* Allow the textarea to take up remaining space */
+            flex-grow: 1;
             padding: 20px;
-            background-color: #000; /* Black background for typing */
-            color: #FFF; /* White text */
+            background-color: var(--bg-color);
+            color: var(--text-color);
             border: none;
             resize: none;
             box-sizing: border-box;
             outline: none;
-            /* Match font-family, font-size, and line-height with body for consistent spacing */
             font-family: inherit;
             font-size: inherit;
             line-height: inherit;
-            overflow-y: auto; /* Allow vertical scrolling */
-            white-space: pre-wrap; /* Preserve line breaks and wrap text */
-            word-wrap: break-word; /* Break long words */
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            text-shadow: 0 0 1px rgba(255, 255, 255, 0.1); /* Subtle text shadow */
+            caret-color: var(--text-color); /* Blinking cursor color */
+        }
+
+        /* Placeholder style for better user guidance */
+        #notePad::placeholder {
+            color: var(--line-number-color);
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="lineNumbers"></div>
-        <textarea id="notePad"></textarea>
+        <textarea id="notePad" placeholder="Start typing your note here..."></textarea>
     </div>
 
     <script>
@@ -67,33 +104,56 @@
         const lineNumbers = document.getElementById('lineNumbers');
 
         function updateLineNumbers() {
+            // Ensure at least one line number is always displayed
             const text = notePad.value;
             const lines = text.split('\n');
-            const numbersHtml = lines.map((_, index) => `<div>${index + 1}</div>`).join('');
+            const numberOfLines = Math.max(lines.length, 1); // At least 1 line
+            const numbersHtml = Array.from({ length: numberOfLines }, (_, i) => `<div>${i + 1}</div>`).join('');
             lineNumbers.innerHTML = numbersHtml;
+
+            // Sync scroll immediately after updating numbers, in case content reflows
+            syncScroll();
         }
 
         function syncScroll() {
             lineNumbers.scrollTop = notePad.scrollTop;
         }
 
+        // Handles Tab key to insert a tab character instead of changing focus
+        notePad.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault(); // Prevent default tab behavior (focusing next element)
+                const start = notePad.selectionStart;
+                const end = notePad.selectionEnd;
+
+                // Insert tab character
+                notePad.value = notePad.value.substring(0, start) + '\t' + notePad.value.substring(end);
+
+                // Move cursor to after the inserted tab
+                notePad.selectionStart = notePad.selectionEnd = start + 1;
+
+                updateLineNumbers(); // Update line numbers after inserting tab
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
-            const savedNote = localStorage.getItem('numberedNote');
+            const savedNote = localStorage.getItem('monolithNote'); // Changed key to avoid conflicts
             if (savedNote) {
                 notePad.value = savedNote;
+            } else {
+                // Pre-fill with a helpful tip if empty
+                notePad.value = "Welcome to Monolith Note!\n\nStart typing your thoughts here. Your work saves automatically.\n\nPress Tab for indentation.";
             }
-            updateLineNumbers();
+            updateLineNumbers(); // Initial update
         });
 
         notePad.addEventListener('input', () => {
             updateLineNumbers();
-            localStorage.setItem('numberedNote', notePad.value);
+            localStorage.setItem('monolithNote', notePad.value); // Changed key
         });
 
         notePad.addEventListener('scroll', syncScroll);
-        window.addEventListener('resize', updateLineNumbers); // Good for when text reflows
-
-        updateLineNumbers(); // Ensure initial "1" is visible
+        window.addEventListener('resize', updateLineNumbers); // Recalculate on resize
     </script>
 </body>
 </html>
