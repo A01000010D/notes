@@ -10,8 +10,8 @@
         :root {
             --bg-color: #1a1a1a; /* Darker background */
             --text-color: #e0e0e0; /* Lighter text for contrast */
-            --line-number-color: #666; /* Slightly darker gray for line numbers */
-            --border-color: #444; /* For subtle separators */
+            --line-number-color: #666; /* This variable isn't used directly for line numbers anymore, but kept for consistency if you add other subtle elements */
+            --border-color: #444; /* For subtle separators if needed */
             --caret-color: #00ff00; /* Green blinking cursor for "terminal" feel */
         }
 
@@ -31,7 +31,7 @@
             display: flex;
             width: 100%;
             height: 100%;
-            /* No left border on container, instead use right border on line numbers */
+            /* No left border on container, as line numbers are removed */
         }
 
         /* Custom Scrollbar Styles for Webkit browsers */
@@ -43,34 +43,16 @@
             background: var(--bg-color);
         }
         ::-webkit-scrollbar-thumb {
-            background: var(--line-number-color);
+            background: var(--line-number-color); /* Using a darker shade for the thumb */
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #777;
         }
 
-        /* Line numbers area */
-        #lineNumbers {
-            flex-shrink: 0; /* Prevent shrinking */
-            padding: 20px 10px 20px 15px; /* Adjusted padding */
-            background-color: var(--bg-color);
-            color: var(--line-number-color);
-            text-align: right;
-            user-select: none; /* Prevent text selection */
-            overflow: hidden; /* Hide scrollbar for line numbers */
-            border-right: 1px solid var(--border-color); /* Subtle separator */
-            font-size: 0.9em; /* Slightly smaller font for numbers */
-            line-height: inherit; /* Inherit line height for consistent spacing */
-        }
-
-        #lineNumbers div {
-            height: 1.6em; /* Match line-height of notePad for perfect sync */
-        }
-
         /* Main typing area */
         #notePad {
-            flex-grow: 1; /* Take up remaining space */
+            flex-grow: 1; /* Take up all available space */
             padding: 20px;
             background-color: var(--bg-color);
             color: var(--text-color);
@@ -97,34 +79,12 @@
 </head>
 <body>
     <div class="container">
-        <div id="lineNumbers"></div>
         <textarea id="notePad" placeholder="Start typing your note here..."></textarea>
     </div>
 
     <script>
         const notePad = document.getElementById('notePad');
-        const lineNumbers = document.getElementById('lineNumbers');
-
-        // Function to update line numbers based on content
-        function updateLineNumbers() {
-            // Get the current text and split by newlines
-            const text = notePad.value;
-            const lines = text.split('\n');
-            // Determine the number of lines, ensuring at least one line is always shown
-            const numberOfLines = Math.max(lines.length, 1);
-            
-            // Generate HTML for line numbers
-            const numbersHtml = Array.from({ length: numberOfLines }, (_, i) => `<div>${i + 1}</div>`).join('');
-            lineNumbers.innerHTML = numbersHtml;
-
-            // Immediately sync scroll positions after updating numbers
-            syncScroll();
-        }
-
-        // Function to synchronize the scroll position of line numbers with the notepad
-        function syncScroll() {
-            lineNumbers.scrollTop = notePad.scrollTop;
-        }
+        // lineNumbers constant and related functions (updateLineNumbers, syncScroll) are removed
 
         // Event listener for the Tab key
         notePad.addEventListener('keydown', (e) => {
@@ -139,8 +99,6 @@
 
                 // Move the cursor to after the inserted tab
                 notePad.selectionStart = notePad.selectionEnd = start + 1;
-
-                updateLineNumbers(); // Update line numbers after inserting tab
             }
         });
 
@@ -154,20 +112,17 @@
                 // If no saved note, pre-fill with a helpful message
                 notePad.value = "Welcome to Monolith Note!\n\nStart typing your thoughts here. Your work saves automatically.\n\nPress Tab for indentation.";
             }
-            updateLineNumbers(); // Initial update of line numbers
+            // No initial updateLineNumbers call needed anymore
         });
 
         // Event listener for any input in the notepad (typing, pasting, etc.)
         notePad.addEventListener('input', () => {
-            updateLineNumbers(); // Update line numbers
+            // No updateLineNumbers call needed here
             localStorage.setItem('monolithNote', notePad.value); // Save content to localStorage
         });
 
-        // Event listener for scrolling in the notepad
-        notePad.addEventListener('scroll', syncScroll);
-
-        // Event listener for window resizing (to adjust line numbers if layout changes)
-        window.addEventListener('resize', updateLineNumbers);
+        // Scroll synchronization is no longer needed as there's no separate line number element
+        // window.addEventListener('resize', updateLineNumbers); // This is also removed
     </script>
 </body>
 </html>
